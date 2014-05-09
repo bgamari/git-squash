@@ -1,0 +1,111 @@
+#!/usr/bin/python
+
+import sys
+import logging
+import subprocess
+import argparse
+
+logging.basicConfig(level=logging.DEBUG)
+
+description = """\
+This is a utility for conveniently squashing commits similar to what
+can already be done with `git rebase -i`. That is given a tree,
+
+  A --> B --> C --> D
+                    ^
+                    HEAD
+
+running `git squash C D --into=A` will generate,
+
+  A+C+D --> B
+            ^
+            HEAD
+
+`git squash` will automatically sort the squashed commits in a
+reasonable order to minimize conflicts.
+
+"""
+
+def is_ancestor(a, b):
+    ret = subprocess.call(['git', 'merge-base', '--is-ancestor', a, b])
+    if ret == 0:
+        return True
+    elif ret == 1:
+        return False
+    else:
+        raise RuntimeError('Error running git merge-base')
+
+def revlist(args):
+    out = subprocess.check_output(['git', 'rev-list'] + args)
+    return out.split()
+    
+def topo_order(commits):
+    """ Sort the given set of commits in topological order """
+    return revlist(['--no-walk', '--topo-order']+commits)
+
+def cherrypick(*args):
+    subprocess.call(['git', 'cherry-pick']+list(args))
+
+
+def is_tree_dirty():
+    out = subprocess.check_output(['git', 'diff'])
+    return len(out) > 0
+
+def squash_all(commits, into):
+    # Ensure --into commit is ancestor to all squashed commits 
+    not_children = [commit for commit in commits
+                    if not is_ancestor(into, commit)]
+    if len(not_children) > 0:
+        print 'error: the following commits are not children of --into commit:'
+        print '\n'.join(not_children)
+        sys.exit(1)
+
+    # Put squashed commits into reasonable order
+    orig_count = len(commits)
+    commits = list(reversed(topo_order(commits)))
+    if len(commits) < orig_count:
+        logging.error('Lost commits')
+        sys.exit(1)
+    logging.info('Will squash %s into %s' % (commits, into))
+
+    # Find parents of starting HEAD that we'll need to re-apply
+    remaining = [commit for commit in reversed(revlist([into+'..'+'HEAD']))
+                 if commit not in commits]
+    logging.info('Will apply %s on top of %s' % (remaining, into))
+
+    # Now let's start doing the work
+    # Start with clean tree on --into commit
+    was_dirty = is_tree_dirty()
+    if was_dirty:
+        logging.info('Tree was dirty, stashing')
+        subprocess.call(['git', 'stash', '--quiet'])
+    logging.info('Resetting to --into commit')
+    subprocess.call(['git', 'reset', '--quiet', '--hard', into])
+
+    # Squash commits
+    for commit in commits:
+        logging.info('Squashing '+commit)
+        cherrypick('--no-commit', commit)
+
+    # Update commit
+    subprocess.call(['git', 'commit', '--quiet', '--amend', '--all', '--no-edit'])
+
+    # Cherry-pick remaining
+    for commit in remaining:
+        logging.info('Cherry-picking '+commit)
+        cherrypick(commit)
+
+    # Unstash
+    if was_dirty:
+        logging.info('Tree was dirty, unstashing')
+        subprocess.call(['git', 'stash', '--quiet', 'pop'])
+
+parser = argparse.ArgumentParser(
+    prog='git-squash',
+    formatter_class=argparse.RawDescriptionHelpFormatter,
+    description=description)
+parser.add_argument('-i', '--into', help='commit to squash into')
+parser.add_argument('commit', nargs='+', help='commit(s) to squash')
+args = parser.parse_args()
+
+squash_all(args.commit, args.into)
