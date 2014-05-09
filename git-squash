@@ -44,8 +44,7 @@ def topo_order(commits):
     return revlist(['--no-walk', '--topo-order']+commits)
 
 def cherrypick(*args):
-    subprocess.call(['git', 'cherry-pick']+list(args))
-
+    subprocess.check_call(['git', 'cherry-pick']+list(args))
 
 def is_tree_dirty():
     out = subprocess.check_output(['git', 'diff'])
@@ -78,9 +77,9 @@ def squash_all(commits, into):
     was_dirty = is_tree_dirty()
     if was_dirty:
         logging.info('Tree was dirty, stashing')
-        subprocess.call(['git', 'stash', '--quiet'])
+        subprocess.check_call(['git', 'stash', '--quiet'])
     logging.info('Resetting to --into commit')
-    subprocess.call(['git', 'reset', '--quiet', '--hard', into])
+    subprocess.check_call(['git', 'reset', '--quiet', '--hard', into])
 
     # Squash commits
     for commit in commits:
@@ -88,7 +87,7 @@ def squash_all(commits, into):
         cherrypick('--no-commit', commit)
 
     # Update commit
-    subprocess.call(['git', 'commit', '--quiet', '--amend', '--all', '--no-edit'])
+    subprocess.check_call(['git', 'commit', '--quiet', '--amend', '--all', '--no-edit'])
 
     # Cherry-pick remaining
     for commit in remaining:
@@ -98,7 +97,7 @@ def squash_all(commits, into):
     # Unstash
     if was_dirty:
         logging.info('Tree was dirty, unstashing')
-        subprocess.call(['git', 'stash', '--quiet', 'pop'])
+        subprocess.check_call(['git', 'stash', 'pop', '--quiet'])
 
 parser = argparse.ArgumentParser(
     prog='git-squash',
