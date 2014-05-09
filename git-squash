@@ -37,7 +37,7 @@ def is_ancestor(a, b):
 
 def revlist(args):
     out = subprocess.check_output(['git', 'rev-list'] + args)
-    return out.split()
+    return out.split('\n')
     
 def topo_order(commits):
     """ Sort the given set of commits in topological order """
