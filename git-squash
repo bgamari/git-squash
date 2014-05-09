@@ -9,15 +9,15 @@ logging.basicConfig(level=logging.DEBUG)
 
 description = """\
 This is a utility for conveniently squashing commits similar to what
-can already be done with `git rebase -i`. That is given a tree,
+can already be done with `git rebase -i`. That is given a repository,
 
-  A --> B --> C --> D
+  A <-- B <-- C <-- D
                     ^
                     HEAD
 
 running `git squash C D --into=A` will generate,
 
-  A+C+D --> B
+  A+C+D <-- B
             ^
             HEAD
 
