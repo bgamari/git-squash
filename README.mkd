@@ -1,0 +1,36 @@
+# git squash - Convenient squashing from the command line
+
+When iterating a patch-set, I often find myself squashing with
+`git-rebase -i`. For instance, say you have a repository that looks
+like this,
+
+    A <-- B <-- C
+                ^
+                HEAD
+
+You find a silly mistake in `B`, which you correct in a new commit `D`
+yielding,
+
+    A <-- B <-- C <-- D
+                      ^
+
+To produce a clean revision history (or to hide your silly mistake),
+you'd want to merge `D` to `B` to produce,
+
+    A <-- B+D <-- C
+                  ^
+
+To do this with `git rebase`, you'd need to run `git rebase -i A`,
+look through a list of commits, find `D`, move it after `B`, changes
+its flag to `squash`, save, and exit. This kills time.
+
+Enter `git squash`,
+
+    $ git squash D --into B
+
+Squashing multiple commits is trivial,
+
+    $ git squash F Z D --into B
+
+`git-squash` will automatically put `F`, `Z`, and `D` into topological
+order before squashing to minimize the chance for conflicts.
