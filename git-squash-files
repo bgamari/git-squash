@@ -36,7 +36,7 @@ def prompt_for_target_commit(file, start_commit='HEAD', max_options=10):
                 
         if sel == 0:
             return None
-        elif sel < len(commits):
+        elif sel-1 < len(commits):
             return commits[sel-1]
 
 parser = argparse.ArgumentParser(
