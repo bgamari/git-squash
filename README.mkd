@@ -34,3 +34,53 @@ Squashing multiple commits is trivial,
 
 `git-squash` will automatically put `F`, `Z`, and `D` into topological
 order before squashing to minimize the chance for conflicts.
+
+
+## git-squash-files - Even easier squashing of trivial fixes
+
+Say you are working on you pet project one afternoon and add a lovely
+new feature to `turtle-feeder.c`. Confident in your work, you move on
+to add more lovely features elsewhere in the repository without
+testing (since bugs never happen, right?).
+
+Several hours of hacking and numerous finished features later, you go
+to test your day's work. It doesn't take long to realize that you
+introduced a trivial bug into `turtle-feeder.c`, which you handily fix
+and commit. Being a strong believer in clean revision history, you
+want to merge this fix into your original commit.
+
+Previously this would have involved using `git rebase -i` and
+squashing the fix into the original commit. `git-squash` described
+above makes this process slightly easier,
+
+    $ git squash FIX --into=ORIGINAL
+
+But this of course assumes that you know the commit id of `ORIGINAL`.
+This seems silly; in all likelihood `ORIGINAL` is one of the last
+commits to touch `turtle-feeder.c`. Why can't `git` just do what you
+want?
+
+`git-squash-files` does just that,
+
+    $ git squash-files HEAD^..HEAD
+    Choose a commit to squash
+      d210978 silly turtle-feeder fix
+    into,
+      1. 7797f05 turtle-feeder: introduce new feature
+      2. 2c6ba60 turtle-feeder: don't feed twice on saturday
+      3. a849213 Various fixes
+      4. 4ff91b1 turtle-feeder: initial commmit
+      0. Skip this commit
+
+    [1]? <Enter>
+
+    Merged d210978d7c077cb99954898c8890958a7bdfba15 into 7797f05af13897a9a588cc076dc2b163ff7d94d7
+    $ 
+
+In particular, `git-squash-files` iterates through each of the commits
+in the given range and for each one,
+
+  1. Ensures that the commit touches only one file
+  2. Finds the recent commits which touch this file
+  3. Prompts the user to select one of these to squash into 
+  4. Squashes the commit as asked

@@ -1,0 +1,67 @@
+#!/usr/bin/python
+
+import sys
+import logging
+import subprocess
+import argparse
+
+description = """\
+"""
+
+def changed_files(args=[]):
+    files = subprocess.check_output(['git', 'diff', '--name-only']+args).split('\n')
+    return [f for f in files if len(f) > 0]
+
+def revlist(args):
+    out = subprocess.check_output(['git', 'rev-list'] + args)
+    return [c for c in out.split('\n') if len(c) > 0]
+
+def prompt_for_target_commit(file, start_commit='HEAD', max_options=10):
+    commits = revlist(['--max-count=%d' % max_options, start_commit, '--', file])
+    lines = subprocess.check_output(['git', 'show', '--oneline', '--no-patch', '--color=always'] + commits)[:-1]
+    lines = '\n'.join('  %d. %s' % (i,l) for (i,l) in enumerate(lines.split('\n'), 1))
+
+    print(lines)
+    print('  0. Skip this commit')
+    print('')
+    while True:
+        sel = raw_input('[1]? ').strip()
+        if len(sel) == 0:
+            sel = 1
+        else:
+            try:
+                sel = int(sel)
+            except:
+                continue
+                
+        if sel == 0:
+            return None
+        elif sel < len(commits):
+            return commits[sel-1]
+
+parser = argparse.ArgumentParser(
+    prog='git-squash-files',
+    formatter_class=argparse.RawDescriptionHelpFormatter,
+    description=description)
+parser.add_argument('commit', nargs='+', help='commit(s) to squash')
+args = parser.parse_args()
+
+commits = revlist(args.commit)
+for commit in commits:
+    files = changed_files(['%s^..%s' % (commit, commit)])
+    if len(files) > 1:
+        print('Error: Commit %s touches %d files, skipping' % (commit, len(files)))
+        continue
+
+    file = files[0]
+    desc = subprocess.check_output(['git', 'show', '--oneline', '--no-patch', '--color=always', commit])
+    print('Choose a commit to squash')
+    print('  '+desc.strip())
+    print('into,')
+    target = prompt_for_target_commit(file, start_commit=commit+'^')
+    if target is None:
+        print('Skipped')
+        continue
+
+    subprocess.check_call(['git-squash', commit, '--into='+target])
+    print('Merged %s into %s' % (commit, target))
