@@ -6,8 +6,11 @@ import subprocess
 import argparse
 
 description = """\
-This is a utility for conveniently squashing commits similar to what
-can already be done with `git rebase -i`. That is given a repository,
+This is a utility for conveniently squashing commits. This is similar
+to what can already be done with `git rebase -i` but aims to provide
+an optimized workflow for squashing in particular.
+
+Given a repository,
 
   A <-- B <-- C <-- D
                     ^
