@@ -64,4 +64,4 @@ for commit in commits:
         continue
 
     subprocess.check_call(['git-squash', commit, '--into='+target])
-    print('Merged %s into %s' % (commit, target))
+    print('Squashed %s into %s' % (commit, target))

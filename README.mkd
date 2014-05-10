@@ -1,4 +1,4 @@
-# git squash - Squash faster
+# git squash - Squash commits faster
 
 When iterating a patch-set, I often find myself squashing with
 `git-rebase -i`. For instance, say you have a repository that looks
@@ -15,7 +15,7 @@ yielding,
                       ^
 
 To produce a clean revision history (or to hide your silly mistake),
-you'd want to merge `D` to `B` to produce,
+you'd want to absorb `D` into `B` to produce,
 
     A <-- B+D <-- C
                   ^
@@ -47,7 +47,7 @@ Several hours of hacking and numerous finished features later, you go
 to test your day's work. It doesn't take long to realize that you
 introduced a trivial bug into `turtle-feeder.c`, which you handily fix
 and commit. Being a strong believer in clean revision history, you
-want to merge this fix into your original commit.
+want to absorb this fix into your original commit.
 
 Previously this would have involved using `git rebase -i` and
 squashing the fix into the original commit. `git-squash` described
@@ -74,7 +74,7 @@ want?
 
     [1]? <Enter>
 
-    Merged d210978d7c077cb99954898c8890958a7bdfba15 into 7797f05af13897a9a588cc076dc2b163ff7d94d7
+    Squashed d210978d7c077cb99954898c8890958a7bdfba15 into 7797f05af13897a9a588cc076dc2b163ff7d94d7
     $ 
 
 In particular, `git-squash-files` iterates through each of the commits
