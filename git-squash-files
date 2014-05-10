@@ -6,6 +6,12 @@ import subprocess
 import argparse
 
 description = """\
+This is a utility for convenientsly squashing single-file commits
+into another commit touching the same file. Given a commit touching a
+single file (e.g. a trivial bugfix), `git squash-files` will prompt
+the user to select one of the recent commits that touches the file to
+squash into.
+
 """
 
 def changed_files(args=[]):
