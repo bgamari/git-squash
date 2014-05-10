@@ -83,4 +83,4 @@ in the given range and for each one,
   1. Ensures that the commit touches only one file
   2. Finds the recent commits which touch this file
   3. Prompts the user to select one of these to squash into 
-  4. Squashes the commit as asked
+  4. Uses `git squash` to squash the commit
