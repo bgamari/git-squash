@@ -43,10 +43,14 @@ parser = argparse.ArgumentParser(
     prog='git-squash-files',
     formatter_class=argparse.RawDescriptionHelpFormatter,
     description=description)
-parser.add_argument('commit', nargs='+', help='commit(s) to squash')
+parser.add_argument('commit', nargs='*', help='commit(s) to squash. HEAD if not given.')
 args = parser.parse_args()
 
-commits = revlist(args.commit)
+commits = args.commit
+if len(commits) == 0:
+    commits = ['HEAD^..HEAD']
+commits = revlist(commits)
+
 for commit in commits:
     files = changed_files(['%s^..%s' % (commit, commit)])
     if len(files) > 1:
