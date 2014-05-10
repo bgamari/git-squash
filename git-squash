@@ -88,35 +88,36 @@ def squash_all(commits, into):
         logging.info('Cherry-picking '+commit)
         cherrypick(commit)
 
-parser = argparse.ArgumentParser(
-    prog='git-squash',
-    formatter_class=argparse.RawDescriptionHelpFormatter,
-    description=description)
-parser.add_argument('-i', '--into', help='commit to squash into')
-parser.add_argument('commit', nargs='+', help='commit(s) to squash')
-parser.add_argument('-v', '--verbose', action='store_true', help='enable debug output')
-args = parser.parse_args()
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(
+        prog='git-squash',
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        description=description)
+    parser.add_argument('-i', '--into', help='commit to squash into')
+    parser.add_argument('commit', nargs='+', help='commit(s) to squash')
+    parser.add_argument('-v', '--verbose', action='store_true', help='enable debug output')
+    args = parser.parse_args()
 
-if args.verbose:
-    logging.basicConfig(level=logging.INFO)
+    if args.verbose:
+        logging.basicConfig(level=logging.INFO)
 
-# Where are we currently?
-initial_commit = subprocess.check_output(['git', 'rev-parse', 'HEAD'])
-logging.info('Currently on %s' % initial_commit)
+    # Where are we currently?
+    initial_commit = subprocess.check_output(['git', 'rev-parse', 'HEAD'])
+    logging.info('Currently on %s' % initial_commit)
 
-was_dirty = is_tree_dirty()
-if was_dirty:
-    logging.info('Tree was dirty, stashing')
-    subprocess.check_call(['git', 'stash', '--quiet'])
+    was_dirty = is_tree_dirty()
+    if was_dirty:
+        logging.info('Tree was dirty, stashing')
+        subprocess.check_call(['git', 'stash', '--quiet'])
 
-try:
-    squash_all(args.commit, args.into)
-except Exception as e:
-    print('Exception caught while trying to squash: '+e)
-    print('Rolled back to previous state (commit %s)' % initial_commit)
-    subprocess.check_call(['git', 'reset', '--hard', initial_commit])
+    try:
+        squash_all(args.commit, args.into)
+    except Exception as e:
+        print('Exception caught while trying to squash: '+e)
+        print('Rolled back to previous state (commit %s)' % initial_commit)
+        subprocess.check_call(['git', 'reset', '--hard', initial_commit])
 
-# Unstash if necessary
-if was_dirty:
-    logging.info('Tree was dirty, unstashing')
-    subprocess.check_call(['git', 'stash', 'pop', '--quiet'])
+    # Unstash if necessary
+    if was_dirty:
+        logging.info('Tree was dirty, unstashing')
+        subprocess.check_call(['git', 'stash', 'pop', '--quiet'])
