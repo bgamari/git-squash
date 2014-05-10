@@ -36,7 +36,7 @@ Squashing multiple commits is trivial,
 order before squashing to minimize the chance for conflicts.
 
 
-# git-squash-files - Squash even faster
+# git squash-files - Squash even faster
 
 Say you are working on you pet project one afternoon and add a lovely
 new feature to `turtle-feeder.c`. Confident in your work, you move on
