@@ -5,7 +5,7 @@ import logging
 import subprocess
 import argparse
 
-logging.basicConfig(level=logging.DEBUG)
+#logging.basicConfig(level=logging.DEBUG)
 
 description = """\
 This is a utility for conveniently squashing commits similar to what
