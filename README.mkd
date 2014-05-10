@@ -1,4 +1,4 @@
-# git squash - Convenient squashing from the command line
+# git squash - Squash faster
 
 When iterating a patch-set, I often find myself squashing with
 `git-rebase -i`. For instance, say you have a repository that looks
@@ -36,7 +36,7 @@ Squashing multiple commits is trivial,
 order before squashing to minimize the chance for conflicts.
 
 
-## git-squash-files - Even easier squashing of trivial fixes
+# git-squash-files - Squash even faster
 
 Say you are working on you pet project one afternoon and add a lovely
 new feature to `turtle-feeder.c`. Confident in your work, you move on
