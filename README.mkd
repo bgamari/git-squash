@@ -1,3 +1,13 @@
+# notes
+
+When I first wrote this I was unaware of `git commit --squash`. This
+feature provides similiar functionality to that provided by the
+scripts in this repository.
+
+`git-squash` is useful when you want to squash an already existing
+commit into another commit. `git-squash-files` has no analogue in the
+current `git` distribution.
+
 # git squash - Squash commits faster
 
 When iterating a patch-set, I often find myself squashing with
