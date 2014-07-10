@@ -30,10 +30,15 @@ def prompt_for_target_commit(file, start_commit='HEAD', max_options=10):
     print(lines)
     print('  0. Skip this commit')
     print('')
+    print('Add a ? after a number to show the commit')
     while True:
         sel = raw_input('[1]? ').strip()
         if len(sel) == 0:
             sel = 1
+        elif sel.endswith('?'):
+            sel = int(sel[:-1])
+            subprocess.check_call(['git', 'show', commits[sel-1]])
+            continue
         else:
             try:
                 sel = int(sel)
