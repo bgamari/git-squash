@@ -22,19 +22,24 @@ def revlist(args):
     out = subprocess.check_output(['git', 'rev-list'] + args)
     return [c for c in out.split('\n') if len(c) > 0]
 
-def prompt_for_target_commit(file, start_commit='HEAD', max_options=10):
+def prompt_for_target_commit(file, into_commit, start_commit='HEAD', max_options=10):
     commits = revlist(['--max-count=%d' % max_options, start_commit, '--', file])
     lines = subprocess.check_output(['git', 'show', '--oneline', '--no-patch', '--color=always'] + commits)[:-1]
     lines = '\n'.join('  %d. %s' % (i,l) for (i,l) in enumerate(lines.split('\n'), 1))
 
     print(lines)
     print('  0. Skip this commit')
+    print(' N?  Shows commit N')
+    print('  !  Shows the commits we are squashing into')
     print('')
-    print('Add a ? after a number to show the commit')
+
     while True:
         sel = raw_input('[1]? ').strip()
         if len(sel) == 0:
             sel = 1
+        elif sel.endswith('!'):
+            subprocess.check_call(['git', 'show', into_commit])
+            continue
         elif sel.endswith('?'):
             sel = int(sel[:-1])
             subprocess.check_call(['git', 'show', commits[sel-1]])
@@ -73,7 +78,7 @@ for commit in commits:
     print('Choose a commit to squash')
     print('  '+desc.strip())
     print('into,')
-    target = prompt_for_target_commit(file, start_commit=commit+'^')
+    target = prompt_for_target_commit(file, into_commit=commit, start_commit=commit+'^')
     if target is None:
         print('Skipped')
         continue
